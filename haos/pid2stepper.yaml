@@ -1,0 +1,17 @@
+alias: Write PID Output to Damper Stepper Control
+description: ""
+triggers:
+  - trigger: time_pattern
+    seconds: /59
+conditions: []
+actions:
+  - action: number.set_value
+    metadata: {}
+    data:
+      value: >-
+        {{ [20, [380, states('sensor.damper_pid_pid_output') | float(20)] | min]
+        | max }}
+    target:
+      entity_id: number.damper_stepper_control
+mode: single
+

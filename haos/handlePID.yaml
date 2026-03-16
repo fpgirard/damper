@@ -1,0 +1,41 @@
+# automation to enable/disable PID based on heat
+alias: Enable PID controller only when heat is on
+description: ""
+triggers:
+  - trigger: state
+    entity_id:
+      - climate.upstairs
+    to:
+      - heat
+    id: heat_on
+  - trigger: state
+    entity_id:
+      - climate.upstairs
+    to:
+      - "off"
+    id: heat_off
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - heat_on
+        sequence:
+          - action: switch.turn_on
+            metadata: {}
+            target:
+              entity_id: switch.damper_pid_auto_mode
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - heat_off
+        sequence:
+          - action: switch.turn_off
+            metadata: {}
+            target:
+              entity_id: switch.damper_pid_auto_mode
+            data: {}
+mode: single
+
