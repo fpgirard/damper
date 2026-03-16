@@ -1,4 +1,4 @@
-# ![](imgs/front.png)A PID-based Damper To Replace Honeywell Damper Motors
+# ![](imgs/Front.png)A PID-based Damper To Replace Honeywell Damper Motors
 
 ## Components
 
@@ -40,7 +40,7 @@ The logic checks out for a non-inverted PID:
 
 ### Hardware 
 
-I like the STEPPERONLINE motor.   For \~$15, it’s powerful and reliable.   Valar System’s VAL3000 is a robust, elegant ESP32 PCB integrated with a Trinamic 2209 controller.  This board made this project easy and I highly recommend it.  I decreased the current 
+I like the STEPPERONLINE motor.   For \~$15, it’s powerful and reliable.   Valar System’s VAL3000 is a robust, elegant ESP32 PCB integrated with a Trinamic 2209 controller.  This board made this project easy and I highly recommend it.  I decreased the current by 50% by setting the irun value for the TMC220 to 15.
 
 3D printed cases are OpenSCAD designs.  STL files are also provided.  See above bolts to attach them.
 
