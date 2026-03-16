@@ -1,5 +1,4 @@
-![](imgs/front.png)
-#A PID-based Damper To Replace Honeywell Damper Motors 
+# ![](imgs/front.png)A PID-based Damper To Replace Honeywell Damper Motors
 
 ## Components
 
