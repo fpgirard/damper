@@ -30,10 +30,11 @@ For starters, a few assumptions:
 
 The logic checks out for a non-inverted PID:
 
-ScenarioError 		(T1 \- T2)	PID Output			Effect  
-T1 \> T2		Positive	Positive → heat T2 up	✅ Correct  
-T1 \< T2		Negative	Negative → cool T2 down	✅ Correct  
-T1 \= T2		Zero		Zero → do nothing		✅ Correct
+| Scenario | T1-T2    | PID Output              | Effect     |
+| :------- | :------- | :---------------------- | :--------- |
+| T1 \> T2 | Positive | Positive → heat T2 up   | ✅ Correct |
+| T1 \< T2 | Negative | Negative → cool T2 down | ✅ Correct |
+| T1 \= T2 | Zero     | Zero → do nothing       | ✅ Correct |
 
 ## Components
 
