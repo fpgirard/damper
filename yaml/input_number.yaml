@@ -1,0 +1,28 @@
+alias: Apply PID Increment to Stepper
+description: " "
+triggers:
+  - trigger: state
+    entity_id: sensor.damper_pid_pid_output
+    enabled: true
+  - trigger: time_pattern
+    seconds: /59
+    enabled: false
+conditions:
+  - condition: template
+    value_template: "{{ states('sensor.damper_pid_pid_output') | float(0) != 0 }}"
+actions:
+  - variables:
+      new_pos: >
+        {{ [[states('sensor.damper_pid_pid_output') | int(0), 20] | max, 380] |
+        min }}
+  - action: input_number.set_value
+    target:
+      entity_id: input_number.damper_position
+    data:
+      value: "{{ new_pos }}"
+  - action: number.set_value
+    target:
+      entity_id: number.damper_stepper_control
+    data:
+      value: "{{ new_pos }}"
+

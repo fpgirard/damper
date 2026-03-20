@@ -23,18 +23,17 @@ Some attic exploring discovered a non-functioning damper on the master bedroom d
 For starters, a few assumptions:
 
 1. We will configure ESPHome using HA’s cover and number templates.  HA’s ‘cover’ lets us fully open, stop, and close the damper.   HA’s ‘number’ allows us to set the damper to any opening level.  Dampers are a 90 degree device.  Since we’re using 8 microsteps on a 200 step/revolution motor, a full rotation is 1600 so 90 degrees is 400 steps.   Leaving 20 steps as margin, our damper has an “OPEN” value of 20 steps and “CLOSED” is 380\.  We also used Trinamic’s StallGuard technology.  I recommend you stick with the StallGuard parameters provided.  
-2. For the PID, we set:  
-   1. The input as the difference between the master bedroom thermostat (T1) and one of the guest bedrooms (T2). T1 \- T2 (aka ‘error’)  
-   2. The Setpoint to be 0 (we want them equal)  
-   3. The Output as a value that increases T2’s temperature.
+2. For this stack, we set:  
+   a. The input as the difference between the master bedroom thermostat (T1) and one of the guest bedrooms (T2). T1 \- T2 (aka ‘error’)
+   b. Delta sensor — mode-aware, reverses math for heat/cool, returns 0 when off
+   c. PID controller — kp: -36.0 ki: -0.5 kd: -5.0, setpoint 0 
+   d. Position accumulator — input_number.damper_position min:20 max:380 initial:20
+   e. Stepper action — absolute PID output, clamped and sent to both accumulator and stepper
+   f. Negative gains provide inverted PID convention in hass-pid-controller
 
-The logic checks out for a non-inverted PID:
+3. There's also an automate that turns on/off the PID controller if the thermostat (via climate entity) is off and on otherwise.
 
-| Scenario | T1-T2    | PID Output              | Effect     |
-| :------- | :------- | :---------------------- | :--------- |
-| T1 \> T2 | Positive | Positive → heat T2 up   | ✅ Correct |
-| T1 \< T2 | Negative | Negative → cool T2 down | ✅ Correct |
-| T1 \= T2 | Zero     | Zero → do nothing       | ✅ Correct |
+View the README files in the individual sub-directories for greater detail on this implementation.  You might have to tune the Kp, Ki, & Kd gains to match your installation.
 
 ## Components
 
@@ -48,10 +47,10 @@ I like the STEPPERONLINE motor.   For \~$15, it’s powerful and reliable.   Val
 
 Home Assistant is required and you will need to create and modify 4 home assistant files:
 
-* A ESPhome Builder damper.yaml configuration file  
-* If you want to fiddle with the StallGuard4 parameters, use the ESPhome Builder testing get-tstep.yaml file to obtain the TSTEP values of your damper controller.  
-* An automation to write the PID output to the control\_stepper number.  This is a bit tricky as I’ve learned because the PID output state doesn’t change if the value remains the same so it’s timer \- not state-based.  
-* An automation to enable or disable the PID controller based on the thermostat setting (heat or off).  The simple PID integration I used has an Auto-Mode\!
+* A ESPhome Builder <span style="font-family:Courier">damper.yaml</span> configuration file  
+* If you want to fiddle with the StallGuard4 parameters, use the ESPhome Builder testing <span style="font-family:Courier">get-tstep.yaml</span> file to obtain the TSTEP values of your damper controller.  
+* An automation, <span style="font-family:Courier">pid2controller.yaml</span> to write the PID output to the control\_stepper number.  This is a bit tricky as I’ve learned because the PID output state doesn’t change if the value remains the same so it’s timer \- not state-based.  
+* An automation, <span style="font-family:Courier">handleClimate.yaml</span> to enable or disable the PID controller based on the thermostat setting (heat or off).  The simple PID integration I used has an Auto-Mode\!
 
 ## Reference Materials
 

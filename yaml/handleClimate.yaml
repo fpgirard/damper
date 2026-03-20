@@ -1,5 +1,4 @@
-# automation to enable/disable PID based on heat
-alias: Enable PID controller only when heat is on
+alias: Enable PID controller only when thermostat mode is heat or cool
 description: ""
 triggers:
   - trigger: state
@@ -7,20 +6,21 @@ triggers:
       - climate.upstairs
     to:
       - heat
-    id: heat_on
+      - cool
+    id: climate_on
   - trigger: state
     entity_id:
       - climate.upstairs
     to:
       - "off"
-    id: heat_off
+    id: climate_off
 conditions: []
 actions:
   - choose:
       - conditions:
           - condition: trigger
             id:
-              - heat_on
+              - climate_on
         sequence:
           - action: switch.turn_on
             metadata: {}
@@ -30,7 +30,7 @@ actions:
       - conditions:
           - condition: trigger
             id:
-              - heat_off
+              - climate_off
         sequence:
           - action: switch.turn_off
             metadata: {}
@@ -38,4 +38,3 @@ actions:
               entity_id: switch.damper_pid_auto_mode
             data: {}
 mode: single
-

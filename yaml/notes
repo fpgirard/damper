@@ -1,0 +1,7 @@
+There are 4 files:
+1. ESPHome damper configuration file: damper.yaml
+   This file provides cover, button, sensor ("my_position") and number ("stepper_control") to Home Assistant
+2. Input Number to provide persistent state for damper position
+3. PID2Damper automation to move the stepper to the new position 
+4. A template for reversing the thermostats for heat/cool  
+
