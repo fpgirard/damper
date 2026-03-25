@@ -1,40 +1,97 @@
-alias: Enable PID controller only when thermostat mode is heat or cool
+alias: Damper Presence Control
 description: ""
 triggers:
-  - trigger: state
-    entity_id:
-      - climate.upstairs
-    to:
-      - heat
-      - cool
-    id: climate_on
-  - trigger: state
-    entity_id:
-      - climate.upstairs
-    to:
-      - "off"
-    id: climate_off
-conditions: []
+  - entity_id:
+      - binary_sensor.upstairs_occupancy
+      - binary_sensor.upstairs_remote_occupancy
+      - binary_sensor.presence_multi_sensor_fp300_occupancy
+      - sensor.damper_pid_pid_output
+    trigger: state
 actions:
+  - variables:
+      master: "{{ states('binary_sensor.upstairs_occupancy') == 'on' }}"
+      office: "{{ states('binary_sensor.upstairs_remote_occupancy') == 'on' }}"
+      guest: >-
+        {{ states('binary_sensor.presence_multi_sensor_fp300_occupancy') == 'on'
+        }}
+      pid_pos: >
+        {{ [[states('sensor.damper_pid_pid_output') | int(0), 20] | max, 380] |
+        min }}
   - choose:
       - conditions:
-          - condition: trigger
-            id:
-              - climate_on
-        sequence:
-          - action: switch.turn_on
-            metadata: {}
-            target:
-              entity_id: switch.damper_pid_auto_mode
-            data: {}
-      - conditions:
-          - condition: trigger
-            id:
-              - climate_off
+          - condition: template
+            value_template: "{{ not master and not office and not guest }}"
         sequence:
           - action: switch.turn_off
             metadata: {}
             target:
               entity_id: switch.damper_pid_auto_mode
             data: {}
-mode: single
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.damper_position
+            data:
+              value: 20
+          - action: number.set_value
+            target:
+              entity_id: number.damper_stepper_control
+            data:
+              value: 20
+      - conditions:
+          - condition: template
+            value_template: "{{ not master and (office or guest) }}"
+        sequence:
+          - action: switch.turn_off
+            metadata: {}
+            target:
+              entity_id: switch.damper_pid_auto_mode
+            data: {}
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.damper_position
+            data:
+              value: 380
+          - action: number.set_value
+            target:
+              entity_id: number.damper_stepper_control
+            data:
+              value: 380
+      - conditions:
+          - condition: template
+            value_template: "{{ master and not office and not guest }}"
+        sequence:
+          - action: switch.turn_off
+            metadata: {}
+            target:
+              entity_id: switch.damper_pid_auto_mode
+            data: {}
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.damper_position
+            data:
+              value: 20
+          - action: number.set_value
+            target:
+              entity_id: number.damper_stepper_control
+            data:
+              value: 20
+      - conditions:
+          - condition: template
+            value_template: "{{ master and (office or guest) }}"
+        sequence:
+          - action: switch.turn_on
+            metadata: {}
+            target:
+              entity_id: switch.damper_pid_auto_mode
+            data: {}
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.damper_position
+            data:
+              value: "{{ pid_pos }}"
+          - action: number.set_value
+            target:
+              entity_id: number.damper_stepper_control
+            data:
+              value: "{{ pid_pos }}"
+
